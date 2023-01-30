@@ -48,11 +48,11 @@ jobs:
 
         server: ftp.cityfare.ng
 
-        username: ${{ secrets.ftp_username_codebase }}
-        password: ${{ secrets.ftp_password_codebase }}
+        # username: ${{ secrets.ftp_username_codebase }}
+        # password: ${{ secrets.ftp_password_codebase }}
 
-#         username: codebase@cityfare.ng
-#         password: codebase12345
+        username: codebase@cityfare.ng
+        password: codebase12345
 
         exclude: |
 
