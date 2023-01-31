@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->enum('account_type', ['admin', 'partner', 'passenger', 'driver', 'conductor']);
             $table->float('wallet_balance')->default(0);
             $table->enum('identity', ['male', 'female', 'bus']);
-            $table->string('dob');
+            $table->string('dob')->nullable();
             $table->string('nin')->nullable();
             $table->integer('is_banned')->default(0);
             $table->float('trip_count')->default(0);
