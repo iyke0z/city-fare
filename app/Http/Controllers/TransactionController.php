@@ -235,6 +235,7 @@ class TransactionController extends Controller
         //execute post
         $result = curl_exec($ch);
 
+        echo $result;
    }
 
 
