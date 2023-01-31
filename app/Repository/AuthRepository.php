@@ -2,7 +2,6 @@
 
 namespace App\Repository;
 
-use App\Actions\SendSmsAction;
 use App\Interfaces\AuthRepositoryInterface;
 use App\Mail\PasswordResetEmail;
 use App\Models\Bus;
@@ -12,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -90,6 +90,23 @@ class AuthRepository implements AuthRepositoryInterface{
         }
     }
     public function reset_password($request){}
+    public function sendSmsAction($message, $phone){
+        // $mtnStarts = ['0803','0816','0903','0810','0806','0703','0706','0813','0814','0906'];
+        $firstFour = substr($phone,0,4);
+
+        $response = Http::retry(3, 100)->withHeaders([
+            'Content-type' => 'application/json',
+        ])->withOptions(['verify' => false])->get('https://termii.com/api/sms/send', [
+            'to' => $phone,
+            'from' => 'N-alert',
+            'type' => 'plain',
+            'channel' => 'dnd',
+            'sms' => $message,
+            'api_key' => 'TLRcKdkCeNnRequ4NH1RUIQqfsAef8a0NNTwRx0JLQ7GP536VVFOW0bxaVX7tg',
+        ]);
+
+        return $response->json();
+    }
     public function sendOTP($request)
     {
         $checkOTP = OtpVerfication::where(['phone' => $request['phone']],['request_type' => $request['request_type']]);
@@ -103,7 +120,7 @@ class AuthRepository implements AuthRepositoryInterface{
                     $checkOTP->save();
                     $theMessage = "Your Cityfare Verification Code is " . $checkOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
                     $theMessage = "Cityfare verification " . $checkOTP->otp;
-                    $otpSent = SendSmsAction::run($theMessage, $checkOTP->phone);
+                    $otpSent = $this->sendSmsAction($theMessage, $checkOTP->phone);
                     $otpSent;
 
                     // return res_success('otp sent', $theMessage);
@@ -124,7 +141,7 @@ class AuthRepository implements AuthRepositoryInterface{
         $checkOTP->request_type = $request['request_type'];
         $checkOTP->save();
         $theMessage = "Hello! Your New Citfare Verification Code is " . $checkOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
-        // $otpSent = SendSmsAction::run($theMessage, $checkOTP->phone);
+        // $otpSent =  $this->sendSmsAction::run($theMessage, $checkOTP->phone);
         return res_success('otp sent', $theMessage);
     }
     public function verifyOTP($request)
@@ -159,7 +176,7 @@ class AuthRepository implements AuthRepositoryInterface{
             $verifyOtp->expiry = Carbon::now()->addMinutes(config('services.settings.otp_validity'));
             $verifyOtp->save();
             $theMessage = "Hello! Your New Citfare Verification Code is " . $verifyOtp->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
-            $otpSent = SendSmsAction::run($theMessage, $verifyOtp->phone);
+            $otpSent =  $this->sendSmsAction::run($theMessage, $verifyOtp->phone);
             $otpSent;
             return res_success('otp resent', $verifyOtp->otp);
             // return res_new_otp_sent('A new otp has been sent to the phone number!');
@@ -201,7 +218,7 @@ class AuthRepository implements AuthRepositoryInterface{
             try {
                 Mail::to($generatedOTP->email)->send(new PasswordResetEmail($generatedOTP->otp));
                 // $theMessage = "Hello! Your CityFare Password Reset Verification Code is " . $generatedOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
-                // $otpSent = SendSmsAction::run($theMessage, $user->phone);
+                // $otpSent =  $this->sendSmsAction::run($theMessage, $user->phone);
                 return res_completed('otp sent');
 
                 // return res_completed('An OTP has been sent to your phone, check your inbox!');

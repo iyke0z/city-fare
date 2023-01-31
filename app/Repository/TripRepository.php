@@ -116,8 +116,6 @@ class TripRepository implements TripRepositoryInterface{
             }
         }
 
-        return $closest_stops;
-
         // firebase part
         $response = [];
         $buses = [];
