@@ -19,21 +19,31 @@ class UserRepository implements UserRepositoryInterface{
 
     public function create_user_account($request){
         // create user account
-        $data = [
+        $data1 = [
             'firstname' => $request['firstname'],
             'lastname' => $request['lastname'],
             'phone' => $request['phone'],
             'email'	=> $request['email'],
             'password' => Hash::make($request['password']),
             'account_type' => $request['account_type'],
-            'identity'	=> $request['identity'] != null ?$request['identity'] : null,
-            'dob' => $request['dob'] != null ? $request['dob'] : null,
-            'nin' => $request['nin'] != null ? $request['nin'] : null,
+
         ];
+$data = [
+            'firstname' => $request['firstname'],
+            'lastname' => $request['lastname'],
+            'phone' => $request['phone'],
+            'email'	=> $request['email'],
+            'password' => Hash::make($request['password']),
+            'account_type' => $request['account_type'],
+            'identity'	=> $request['identity'],
+            'dob' => $request['dob'],
+            'nin' => $request['nin'],
+        ];
+
         $verifyOtp = OtpVerfication::where(['phone' => $request['phone']], ['request_type' => 'registration'])->first();
 
         if ($verifyOtp && $verifyOtp->is_verified == 1) {
-            $user = User::create($data);
+            $user = User::create($data1);
             $user;
 
             $contact = new ContactDetail();
