@@ -7,6 +7,7 @@ use App\Http\Requests\PurchaseTripPackageRequest;
 use App\Http\Requests\ScanoutRequest;
 use App\Http\Requests\ScanRequest;
 use App\Interfaces\TransactionRepositoryInterface;
+use App\Mail\PaymentMail;
 use Illuminate\Support\Facades\Log;
 use App\Models\PackageCodes;
 use App\Models\PayAsYouGoCodes;
@@ -17,6 +18,7 @@ use App\Models\User;
 use App\Models\UserTrip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class TransactionController extends Controller
 {
@@ -159,6 +161,8 @@ class TransactionController extends Controller
 
 
             // email user trip units
+            $url = "https://api.qrserver.com/v1/create-qr-code/?data=[$code,user]&size=[100]x[100]";
+            Mail::to("eddyiyke3@gmail.com")->send(new PaymentMail($url));
         }
     }
 
@@ -195,8 +199,6 @@ class TransactionController extends Controller
         }
     }
 
-
-
    public function pay(Request $request){
         $url = "https://api.paystack.co/transaction/initialize";
         $secret = config('services.webhooks.paystack.secret');
@@ -232,7 +234,7 @@ class TransactionController extends Controller
 
         //execute post
         $result = curl_exec($ch);
-        echo $result;
+
    }
 
 
