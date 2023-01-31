@@ -46,10 +46,12 @@ jobs:
 
       with:
 
-        server: ftp.cityfare.ng
+        server: 209.205.209.34
 
         username: ${{ secrets.ftp_username_codebase }}
         password: ${{ secrets.ftp_password_codebase }}
+        protocol: ftp
+        port: 21
 
         exclude: |
 
