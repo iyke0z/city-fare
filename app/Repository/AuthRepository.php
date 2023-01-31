@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Actions\SendSmsAction;
 use App\Interfaces\AuthRepositoryInterface;
+use App\Mail\PasswordResetEmail;
 use App\Models\Bus;
 use App\Models\Log;
 use App\Models\OtpVerfication;
@@ -10,6 +12,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthRepository implements AuthRepositoryInterface{
@@ -98,17 +101,17 @@ class AuthRepository implements AuthRepositoryInterface{
                     $checkOTP->otp = $this->generateOTP();
                     $checkOTP->expiry = Carbon::now()->addMinutes(config('services.settings.otp_validity'));
                     $checkOTP->save();
-                    $theMessage = "Hello! Your New Gabtaxi Verification Code is " . $checkOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
-                    // $theMessage = "Gabtaxi verification " . $checkOTP->otp;
-                    // $otpSent = SendSmsAction::run($theMessage, $checkOTP->phone);
-                    // $otpSent = 1;
+                    $theMessage = "Your Cityfare Verification Code is " . $checkOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
+                    $theMessage = "Cityfare verification " . $checkOTP->otp;
+                    $otpSent = SendSmsAction::run($theMessage, $checkOTP->phone);
+                    $otpSent;
 
-                    return res_success('otp sent', $theMessage);
-                    // return res_completed('A new otp has been sent to the phone number!');
+                    // return res_success('otp sent', $theMessage);
+                    return res_completed('A new otp has been sent to the number!');
 
                 }
                 elseif ($checkOTP->is_verified == 1 && $checkOTP->is_registered == 1){
-                        return res_user_registered('User has already been Registered!');
+                        return res_user_registered('Account exists!');
 
                 }else{
                     return res_phone_number_verified('Your phone number has already been verified!');
@@ -155,7 +158,9 @@ class AuthRepository implements AuthRepositoryInterface{
             $verifyOtp->otp = $this->generateOTP();
             $verifyOtp->expiry = Carbon::now()->addMinutes(config('services.settings.otp_validity'));
             $verifyOtp->save();
-            // $otpSent = SendSmsAction::run($theMessage, $checkOTP->phone);
+            $theMessage = "Hello! Your New Citfare Verification Code is " . $verifyOtp->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
+            $otpSent = SendSmsAction::run($theMessage, $verifyOtp->phone);
+            $otpSent;
             return res_success('otp resent', $verifyOtp->otp);
             // return res_new_otp_sent('A new otp has been sent to the phone number!');
         } else {
@@ -194,10 +199,10 @@ class AuthRepository implements AuthRepositoryInterface{
             ]);
 
             try {
-                // Mail::to($generatedOTP->email)->send(new PasswordResetEmail('Your GABTaxi password recovery code', $generatedOTP->otp));
-                $theMessage = "Hello! Your Gabtaxi Password Reset Verification Code is " . $generatedOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
+                Mail::to($generatedOTP->email)->send(new PasswordResetEmail($generatedOTP->otp));
+                // $theMessage = "Hello! Your CityFare Password Reset Verification Code is " . $generatedOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
                 // $otpSent = SendSmsAction::run($theMessage, $user->phone);
-                return res_success('otp sent', $theMessage);
+                return res_completed('otp sent');
 
                 // return res_completed('An OTP has been sent to your phone, check your inbox!');
             } catch (\Throwable $th) {
@@ -223,7 +228,7 @@ class AuthRepository implements AuthRepositoryInterface{
         //     ]);
 
         //     try {
-        //         Mail::to($generatedOTP->email)->send(new PasswordResetEmail('Your GABTaxi password recovery code', $generatedOTP->otp));
+        //         Mail::to($generatedOTP->email)->send(new PasswordResetEmail('Your CityFare password recovery code', $generatedOTP->otp));
         //         return res_completed('An OTP has been sent to your email, check your inbox!');
         //     } catch (\Throwable $th) {
         //         return res_bad_request($th->getMessage());
