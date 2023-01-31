@@ -26,9 +26,9 @@ class UserRepository implements UserRepositoryInterface{
             'email'	=> $request['email'],
             'password' => Hash::make($request['password']),
             'account_type' => $request['account_type'],
-            'identity'	=> $request['identity'],
-            'dob' => $request['dob'],
-            'nin' => $request['nin'],
+            'identity'	=> $request['identity'] != null ?$request['identity'] : null,
+            'dob' => $request['dob'] != null ? $request['dob'] : null,
+            'nin' => $request['nin'] != null ? $request['nin'] : null,
         ];
         $verifyOtp = OtpVerfication::where(['phone' => $request['phone']], ['request_type' => 'registration'])->first();
 
