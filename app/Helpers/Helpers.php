@@ -24,7 +24,7 @@ if (!function_exists('random_strings')) {
 if (!function_exists('generate_trip_num')) {
     function generate_trip_num()
     {
-        $num = mt_rand(1000000000, 9999999999);
+        $num = mt_rand(1000000000, 9999999999)-25;
         $check = PayAsYouGoCodes::where('code', $num)->first();
 
         if (!$check) {
@@ -37,7 +37,7 @@ if (!function_exists('generate_trip_num')) {
 if (!function_exists('generate_package_code')) {
     function generate_package_code()
     {
-        $num = mt_rand(1000000000, 9999999999);
+        $num = mt_rand(1000000000, 9999999999)-25;
         $check = PayAsYouGoCodes::where('code', $num)->first();
 
         if (!$check) {

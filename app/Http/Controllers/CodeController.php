@@ -29,8 +29,7 @@ class CodeController extends Controller
         $inst = $request['inst'];
 
         for ($i=0; $i < $count ; $i++) {
-            $code = generate_trip_num();
-
+                $code = generate_trip_num();
                 PackageCodes::create([
                     'package_id' => $package,
                     'code' => $code
@@ -41,7 +40,6 @@ class CodeController extends Controller
                     'institution' => $inst != null ? $inst : null
                 ]);
         }
-
         return res_completed('codes generated');
     }
 
@@ -74,6 +72,8 @@ class CodeController extends Controller
         }else{
             return res_not_found('code does not exist');
         }
+
+
 
     }
 
