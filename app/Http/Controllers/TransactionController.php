@@ -191,7 +191,7 @@ class TransactionController extends Controller
                     "userid" => $userid,
                     'ref' => $request['data']['reference']
                 ];
-                // Log::info($request);
+                Log::info($request);
                 $this->add_units_value($details);
             }else{
                 return res_bad_request('This transaction is unverifiable');
@@ -214,6 +214,7 @@ class TransactionController extends Controller
                 ]
             ]
         ];
+
 
         $fields_string = http_build_query($fields);
 
