@@ -177,6 +177,7 @@ class TransactionController extends Controller
 
     public function webHookHandlerPaystack(Request $request){
         // get server origin information
+        Log::info($request['data']['metadata']['custom_fields'][0]['variable_name']);
         $secret = config('services.webhooks.paystack.secret');
         $header = $request->header();
         $input = @file_get_contents("php://input");
@@ -191,7 +192,6 @@ class TransactionController extends Controller
                     "userid" => $userid,
                     'ref' => $request['data']['reference']
                 ];
-                Log::info($request);
                 $this->add_units_value($details);
             }else{
                 return res_bad_request('This transaction is unverifiable');
