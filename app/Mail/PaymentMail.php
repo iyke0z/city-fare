@@ -16,7 +16,7 @@ class PaymentMail extends Mailable
      *
      * @return void
      */
-    private $code;
+    public $code;
     public function __construct($code)
     {
         $this->code = $code;

@@ -143,7 +143,7 @@
 <p style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 24px;"><span style="font-size:16px;">Hi <strong><u>Jessy Doe</u></strong>,</span></p>
 <p style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 21px;"> </p>
 <p style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 24px;"><span style="font-size:16px;">Thank you for your payment</p>
-<p style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 24px;"><span style="font-size:16px;"><img src="{{$code}}" alt=""></span></p>
+<p style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 24px;"><span style="font-size:16px;">{{ $code }}</span></p>
 <p style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 21px;"> </p>
 <p style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 21px;"><span style="color:#000000;font-size:14px;">Use Code for Trips</span></p>
 <p style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 21px;"><span style="color:#000000;font-size:14px;">Ensure to keep this code safe</span></p>
