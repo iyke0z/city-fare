@@ -36,11 +36,11 @@ return [
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
-            'host' => 'cityfare.ng',
+            'host' => 'gabtaxi.com',
             'port' => 465,
             'encryption' => 'ssl',
-            'username' => 'admin@cityfare.ng',
-            'password' =>  'hesoyamAB12@@',
+            'username' => 'send@gabtaxi.com',
+            'password' =>  'EF12@technology',
             'timeout' => null,
             'auth_mode' => null,
         ],

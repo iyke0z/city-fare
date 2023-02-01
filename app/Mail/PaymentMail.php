@@ -31,6 +31,6 @@ class PaymentMail extends Mailable
     {
         return $this->from(env('MAIL_NOREPLY_ADDRESS'), env('APP_NAME'))
         ->markdown('mails.payment-received', [$this->code])
-        ->subject("Password reset");
+        ->subject("Payment Receipt");
     }
 }
