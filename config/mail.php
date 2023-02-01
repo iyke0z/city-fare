@@ -38,7 +38,7 @@ return [
             'transport' => 'smtp',
             'host' => 'cityfare.ng',
             'port' => 465,
-            'encryption' => 'tcp',
+            'encryption' => 'tls',
             'username' => 'admin@cityfare.ng',
             'password' =>  'hesoyamAB12@@',
             'timeout' => null,
