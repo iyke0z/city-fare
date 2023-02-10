@@ -91,8 +91,33 @@ class AuthRepository implements AuthRepositoryInterface{
     }
     public function reset_password($request){}
     public function sendSmsAction($message, $phone){
-        // $mtnStarts = ['0803','0816','0903','0810','0806','0703','0706','0813','0814','0906'];
-        $firstFour = substr($phone,0,4);
+//         $curl = curl_init();
+// $data = array("api_key" => "TLRcKdkCeNnRequ4NH1RUIQqfsAef8a0NNTwRx0JLQ7GP536VVFOW0bxaVX7tg", "to" => "$phone",  "from" => "talert",
+// "sms" => "$message",  "type" => "plain",  "channel" => "dnd" );
+
+// $post_data = json_encode($data);
+
+// curl_setopt_array($curl, array(
+// CURLOPT_URL => "https://api.ng.termii.com/api/sms/send",
+// CURLOPT_RETURNTRANSFER => true,
+// CURLOPT_ENCODING => "",
+// CURLOPT_MAXREDIRS => 10,
+// CURLOPT_TIMEOUT => 0,
+// CURLOPT_FOLLOWLOCATION => true,
+// CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+// CURLOPT_CUSTOMREQUEST => "POST",
+// CURLOPT_POSTFIELDS => $post_data,
+// CURLOPT_HTTPHEADER => array(
+// "Content-Type: application/json"
+// ),
+// ));
+
+// $response = curl_exec($curl);
+
+// curl_close($curl);
+// echo $response;
+
+
 
         $response = Http::retry(3, 100)->withHeaders([
             'Content-type' => 'application/json',
@@ -102,7 +127,7 @@ class AuthRepository implements AuthRepositoryInterface{
             'type' => 'plain',
             'channel' => 'dnd',
             'sms' => $message,
-            'api_key' => 'TLRcKdkCeNnRequ4NH1RUIQqfsAef8a0NNTwRx0JLQ7GP536VVFOW0bxaVX7tg',
+            'api_key' => 'TLNzpBAvKKjCpmfb67sLOT8hswraljyi4a8gdzViiAc75JQlIlj7gwGujarcrD',
         ]);
 
         return $response->json();
@@ -118,8 +143,7 @@ class AuthRepository implements AuthRepositoryInterface{
                     $checkOTP->otp = $this->generateOTP();
                     $checkOTP->expiry = Carbon::now()->addMinutes(config('services.settings.otp_validity'));
                     $checkOTP->save();
-                    $theMessage = "Your Cityfare Verification Code is " . $checkOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
-                    $theMessage = "Cityfare verification " . $checkOTP->otp;
+                    $theMessage = "Your Cityfare Verification Code is " . $checkOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . " minutes.";
                     $otpSent = $this->sendSmsAction($theMessage, $checkOTP->phone);
                     $otpSent;
 
@@ -141,8 +165,8 @@ class AuthRepository implements AuthRepositoryInterface{
         $checkOTP->request_type = $request['request_type'];
         $checkOTP->save();
         $theMessage = "Hello! Your New Citfare Verification Code is " . $checkOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
-        // $otpSent =  $this->sendSmsAction::run($theMessage, $checkOTP->phone);
-        return res_success('otp sent', $theMessage);
+        $otpSent =  $this->sendSmsAction($theMessage, $checkOTP->phone);
+        return res_success('otp sent', $otpSent);
     }
     public function verifyOTP($request)
     {
