@@ -268,7 +268,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                     create new trip
                     else create new trip stating the bustop the units can take the user to
                  */
-                    $checkCode = PayAsYouGoCodes::where('code', $request['trip_no'])->first();
+                    $checkCode = PayAsYouGoCodes::where('code', $request['trip_no'])->where("user_id", null)->first();
                     if($checkCode){
                         if($checkCode->count == 0){
                             return res_bad_request('No trip units!');
