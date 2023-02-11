@@ -152,6 +152,8 @@ class TripRepository implements TripRepositoryInterface{
                                 $distance  = $this->get_distance($startLat, $startLng, $busLat, $busLng );
                                 $load = BusLoad::where('bus_id', $closest_stops[0]['id'])->first();
                                 $res[$i]['bus_id'] = $id;
+                                $res[$i]['distance'] = $distance;
+
                                 if ($distance <= 3 && !$load || $load['is_full'] == 'false') {
                                     array_push($buses, $res[$i]);
                                 }
