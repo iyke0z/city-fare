@@ -90,47 +90,36 @@ class AuthRepository implements AuthRepositoryInterface{
         }
     }
     public function reset_password($request){}
+
     public function sendSmsAction($message, $phone){
-//         $curl = curl_init();
-// $data = array("api_key" => "TLRcKdkCeNnRequ4NH1RUIQqfsAef8a0NNTwRx0JLQ7GP536VVFOW0bxaVX7tg", "to" => "$phone",  "from" => "talert",
-// "sms" => "$message",  "type" => "plain",  "channel" => "dnd" );
+        $email = "cityfareng@gmail.com";
+        $password = "letusgrindAB12@@";
+        $sender_name = "Cityfare";
+        $forcednd = 1;
 
-// $post_data = json_encode($data);
+        $data = array("email" => $email, "password" => $password,"message"=>$message, "sender_name"=>$sender_name,"recipients"=>$phone,"forcednd"=>$forcednd);
+        $data_string = json_encode($data);
+        $ch = curl_init('https://app.multitexter.com/v2/app/sms');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json','Content-Length: ' . strlen($data_string)));
+        $result = curl_exec($ch);
+        $res_array = json_decode($result);
 
-// curl_setopt_array($curl, array(
-// CURLOPT_URL => "https://api.ng.termii.com/api/sms/send",
-// CURLOPT_RETURNTRANSFER => true,
-// CURLOPT_ENCODING => "",
-// CURLOPT_MAXREDIRS => 10,
-// CURLOPT_TIMEOUT => 0,
-// CURLOPT_FOLLOWLOCATION => true,
-// CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-// CURLOPT_CUSTOMREQUEST => "POST",
-// CURLOPT_POSTFIELDS => $post_data,
-// CURLOPT_HTTPHEADER => array(
-// "Content-Type: application/json"
-// ),
-// ));
+        return $res_array;
 
-// $response = curl_exec($curl);
+        // $response = Http::retry(3, 100)->withHeaders([
+        //     'Content-type' => 'application/json',
+        // ])->withOptions(['verify' => false])->get('https://api.ng.termii.com/api/sms/send', [
+        //     'to' => $phone,
+        //     'from' => 'SLC',
+        //     'type' => 'plain',
+        //     'channel' => 'dnd',
+        //     'sms' => $message,
+        //     'api_key' => 'FCP65WJ15RsmlMRWIIinJCgTKjO7ZsQNrG28IqZalSfTcA20XvgOn8kNaCiR',
+        // ]);
 
-// curl_close($curl);
-// echo $response;
-
-
-
-        $response = Http::retry(3, 100)->withHeaders([
-            'Content-type' => 'application/json',
-        ])->withOptions(['verify' => false])->get('https://termii.com/api/sms/send', [
-            'to' => $phone,
-            'from' => 'N-alert',
-            'type' => 'plain',
-            'channel' => 'dnd',
-            'sms' => $message,
-            'api_key' => 'TLNzpBAvKKjCpmfb67sLOT8hswraljyi4a8gdzViiAc75JQlIlj7gwGujarcrD',
-        ]);
-
-        return $response->json();
     }
     public function sendOTP($request)
     {
@@ -166,8 +155,9 @@ class AuthRepository implements AuthRepositoryInterface{
         $checkOTP->save();
         $theMessage = "Hello! Your New Citfare Verification Code is " . $checkOTP->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
         $otpSent =  $this->sendSmsAction($theMessage, $checkOTP->phone);
-        return res_success('otp sent', $otpSent);
+        return res_completed('otp sent', $otpSent);
     }
+
     public function verifyOTP($request)
     {
         $verifyOtp = OtpVerfication::where(['otp' => $request['otp'], 'phone' => $request['phone']])->first();
@@ -200,7 +190,7 @@ class AuthRepository implements AuthRepositoryInterface{
             $verifyOtp->expiry = Carbon::now()->addMinutes(config('services.settings.otp_validity'));
             $verifyOtp->save();
             $theMessage = "Hello! Your New Citfare Verification Code is " . $verifyOtp->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
-            $otpSent =  $this->sendSmsAction::run($theMessage, $verifyOtp->phone);
+            $otpSent = $this->sendSmsAction($theMessage, $verifyOtp->phone);
             $otpSent;
             return res_success('otp resent', $verifyOtp->otp);
             // return res_new_otp_sent('A new otp has been sent to the phone number!');
