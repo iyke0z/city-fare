@@ -154,6 +154,7 @@ class TripRepository implements TripRepositoryInterface{
                                 $res[$i]['bus_id'] = $id;
                                 $res[$i]['distance'] = $distance;
 
+                                dd($distance <= 3 && !$load || $load['is_full'] == 'false');
                                 if ($distance <= 3 && !$load || $load['is_full'] == 'false') {
                                     array_push($buses, $res[$i]);
                                 }
