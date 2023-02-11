@@ -154,9 +154,10 @@ class TripRepository implements TripRepositoryInterface{
                                 $res[$i]['bus_id'] = $id;
                                 $res[$i]['distance'] = $distance;
 
-                                dd($distance <= 3 && !$load || $load['is_full'] == 'false');
-                                if ($distance <= 3 && !$load || $load['is_full'] == 'false') {
-                                    array_push($buses, $res[$i]);
+                                if ($distance <= 3) {
+                                    if (!$load || $load['is_full'] == 'false') {
+                                        array_push($buses, $res[$i]);
+                                    }
                                 }
                             }else{
                                 return res_not_found('no buses available in your route!');
