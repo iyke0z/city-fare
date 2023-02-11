@@ -211,6 +211,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                 /*
                     this is for institutions
                     gets cardo from PayAsYouGoCodes table using trip_no
+                    code is assigned by school
                     if card exists get the institution that card belongs to
                     confirm that the bus is assigned to that institution
                     if true get the units of user_making the request
