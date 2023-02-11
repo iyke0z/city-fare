@@ -10,6 +10,7 @@ use App\Models\CityfareSettings;
 use App\Models\Trip;
 use App\Models\UserBus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class TripRepository implements TripRepositoryInterface{
     public function update_bus_load($request){
@@ -97,6 +98,14 @@ class TripRepository implements TripRepositoryInterface{
         return [$charge, $distanceA];
     }
 
+    private function collection_to_array($arg){
+        $New_start_index = 0;
+        $new_arr = array_combine(range($New_start_index,
+                            count($arg) + ($New_start_index-1)),
+                            array_values($arg));
+        return $new_arr;
+    }
+
     public function get_closest_bus($request){
         $startLat = $request['latitude_from'];
         $startLng = $request['longitude_from'];
@@ -117,28 +126,44 @@ class TripRepository implements TripRepositoryInterface{
         }
 
         // firebase part
-        $response = [];
+        // check online drivers
+        $response = Http::retry(3, 100)->asForm()
+        ->get('https://city-fare-cf9a6-default-rtdb.firebaseio.com/live_location.json', []);
+        $response = $response->json();
+
         $buses = [];
 
-        if(count($response) > 1){
-            for ($i=0; $i < count($response); $i++) {
-                // get buses headed for that bustop
+        if(count($response) > 0){
+            foreach($response as $bus => $key){
+                //
+                    // get buses headed for that bustop
+                    $res = $this->collection_to_array($response);
+                    $pos = strpos($bus,'_');
+                    $id = substr($bus,$pos+1,strlen($bus) - $pos);
 
-                    if($response[$i]['next_busstop_id'] == $closest_stops[0]['id']){
-                        $busLat = $response[$i]['latitude'];
-                        $busLng = $response[$i]['longitude'];
+                    for ($i=0; $i < count($res); $i++) {
+                        $bus_destination = BusDestination::where('bus_id', $id)->first();
 
-                        $distance  = $this->get_distance($startLat, $startLng, $busLat, $busLng );
-                        $load = BusLoad::where('bus_id', $closest_stops[0]['id'])->first();
+                        if($bus_destination['bus_stop'] == $closest_stops[0]['id']){
+                                $isFull = $res[$i]['isFull'];
+                                $busLat = $res[$i]['latitude'];
+                                $busLng = $res[$i]['longitude'];
 
-                        if ($distance <= 3 && !$load || $load['is_full'] == 'false') {
-                            array_push($buses, $response[$i]);
-                        }
-                    }else{
-                        return res_not_found('no buses available in your route!');
+                                $distance  = $this->get_distance($startLat, $startLng, $busLat, $busLng );
+                                $load = BusLoad::where('bus_id', $closest_stops[0]['id'])->first();
+                                $res[$i]['bus_id'] = $id;
+                                if ($distance <= 3 && !$load || $load['is_full'] == 'false') {
+                                    array_push($buses, $res[$i]);
+                                }
+                            }else{
+                                return res_not_found('no buses available in your route!');
+                            }
                     }
 
+
             }
+
+            // }
 
             return res_success('buses', $buses);
         }else{
