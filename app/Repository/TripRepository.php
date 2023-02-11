@@ -158,9 +158,9 @@ class TripRepository implements TripRepositoryInterface{
                         $load = BusLoad::where('bus_id', $closest_stops[0]['id'])->first();
                         $res[$i]['bus_id'] = $id;
                         $res[$i]['distance'] = $distance;
-                        $distParm = 0;
+                        $distParam = 0;
                         if($urgent){
-                            $distParm = 3;
+                            $distParam = 3;
                         }else{
                             $distParam = 5;
                         }
