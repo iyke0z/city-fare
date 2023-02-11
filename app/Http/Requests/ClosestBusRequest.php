@@ -28,7 +28,6 @@ class ClosestBusRequest extends FormRequest
             "longitude_to"=>'required',
             "latitude_from"=>'required',
             "latitude_to"=>'required',
-            "urgent" => 'required|in:true,false'
         ];
     }
 }

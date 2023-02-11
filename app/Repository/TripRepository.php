@@ -107,7 +107,6 @@ class TripRepository implements TripRepositoryInterface{
     }
 
     public function get_closest_bus($request){
-        $urgent = $request['urgent'];
         $startLat = $request['latitude_from'];
         $startLng = $request['longitude_from'];
         $finLat = $request['latitude_to'];
@@ -158,14 +157,8 @@ class TripRepository implements TripRepositoryInterface{
                         $load = BusLoad::where('bus_id', $closest_stops[0]['id'])->first();
                         $res[$i]['bus_id'] = $id;
                         $res[$i]['distance'] = $distance;
-                        $distParam = 0;
-                        if($urgent){
-                            $distParam = 3;
-                        }else{
-                            $distParam = 5;
-                        }
 
-                        if ($distance <= $distParam) {
+                        if ($distance <= 5) {
                             if (!$load || $load['is_full'] == 'false') {
                                 array_push($buses, $res[$i]);
                             }
