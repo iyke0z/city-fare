@@ -168,16 +168,11 @@ class TripRepository implements TripRepositoryInterface{
                     }
             }
 
-            // }
-
             return res_success('buses', $buses);
         }else{
             return res_not_found('no buses available in your route!');
         }
 
-
-
-        //return all buses within that coordinate distance headed for that longitude to and latitude to
     }
 
     public function notify_bus($request){

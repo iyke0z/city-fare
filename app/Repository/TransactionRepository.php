@@ -168,6 +168,14 @@ class TransactionRepository implements TransactionRepositoryInterface{
         if ($bus->status == 'active') {
             $getTripCharge = $this->getTripCharge( $request['latitude'],$request['longitude'],$request['bus_id']);
             if($request['type'] == 'user'){
+                /*
+                    this is for registerd users
+                    gets cardo from UserTrip table using trip_no
+                    if trip exists get the units of the user
+                    if units is greater than 0 and greater than the expected charge for the drip based of bus destination
+                    create new trip
+                    else create new trip stating the bustop the units can take the user to
+                 */
                 $trip_id = UserTrip::where('trip_no', $request['trip_no'])->first();
                 if($trip_id){
                     $trip_count = User::find($trip_id->user_id);
@@ -200,6 +208,13 @@ class TransactionRepository implements TransactionRepositoryInterface{
                 }
             }
             elseif($request['type'] == 'inst'){
+                /*
+                    this is for institutions
+                    gets cardo from PayAsYouGoCodes table using trip_no
+                    if card exists get the institution that card belongs to
+                    confirm that the bus is assigned to that institution
+                    if true get the units of user_making the request
+                 */
                 $checkCode = PayAsYouGoCodes::where('code', $request['trip_no'])->first();
                 if($checkCode){
                     $user = User::find($checkCode->user_id);
@@ -210,7 +225,6 @@ class TransactionRepository implements TransactionRepositoryInterface{
                         $trip_id = PayAsYouGoCodes::where('code', $request['trip_no'])->first();
                         if($trip_id){
                             $trip_count = User::find($trip_id->user_id);
-                            $unitPrice = CityfareSettings::where('user_id', $bus['user_id'])->first();
                             if($trip_count->trip_count == 0){
                                 return res_bad_request('No trip units!');
                             }
@@ -245,12 +259,16 @@ class TransactionRepository implements TransactionRepositoryInterface{
                 }
                 // scan in user
             }else{
-                    // check if code exists and if count is more than 0
+                /*
+                    this is for everyother card type asides user and institution
+                    gets cardo from PayAsYouGoCodes table using trip_no
+                    if card exists get the units left on card
+                    if units is greater than 0 and greater than the expected charge for the drip based of bus destination
+                    create new trip
+                    else create new trip stating the bustop the units can take the user to
+                 */
                     $checkCode = PayAsYouGoCodes::where('code', $request['trip_no'])->first();
                     if($checkCode){
-                        //be sure that trip count is greater than minimum trip_count * 2
-                        $unitPrice = CityfareSettings::first();
-                        //get the trip amount from scan in lat - finalDestination
                         if($checkCode->count == 0){
                             return res_bad_request('No trip units!');
                         }
@@ -287,6 +305,11 @@ class TransactionRepository implements TransactionRepositoryInterface{
         if ($bus->status == 'active') {
 
             if($request['type'] == 'user'){
+                 /*
+                    this is for user card type
+                    get trip information from trip table
+                    if trip exists, reduce user units based on charge for trip
+                 */
                 $trip_id = UserTrip::where('trip_no', $request['trip_no'])->first();
                 if($trip_id){
                     $trip_count = User::find($trip_id->user_id);
@@ -309,6 +332,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                         $trip_count->trip_count = $reduce;
                         $trip_count->save();
 
+                        // UPDATE TRIP
                         $trip->finish_longitude = $request['longitude'];
                         $trip->finish_latitude	= $request['latitude'];
                         $trip->units = $this->charge_trip(
@@ -323,17 +347,21 @@ class TransactionRepository implements TransactionRepositoryInterface{
                     }else{
                         return res_not_found('No trip information found for this bus');
                     }
-
-
                 }else{
                     return res_not_found('Trip number not found');
                 }
             }else if($request['type'] == 'inst'){
+                /*
+                    this is for inst card type
+                    validate code
+                    get trip information from trip table
+                    if trip exists, reduce user units based on charge for trip
+                 */
                 $checkCode = PayAsYouGoCodes::where('code', $request['trip_no'])->first();
                 if($checkCode){
                     $user = User::find($checkCode->user_id);
 
-                    // check if bus belongs to inst
+                    // check if bus is assigned to inst
                     $userBus = UserBus::where('user_id', $user->institution_id)->where('bus_id', $request['bus_id'])->first();
                     if($userBus) {
                         $trip_count = User::find($user->id);
@@ -344,6 +372,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                                     ->first();
 
                         if($trip){
+                            // CHARGE INSTITUTION CARD
                             $reduce = $trip_count->trip_count - $this->charge_trip(
                                 $trip['start_latitude'],
                                 $trip['start_longitude'],
@@ -355,6 +384,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                             $trip_count->trip_count = $reduce;
                             $trip_count->save();
 
+                            // UPDATE TRIP TABLE
                             $trip->finish_longitude = $request['longitude'];
                             $trip->finish_latitude	= $request['latitude'];
                             $trip->units = $this->charge_trip(
@@ -374,7 +404,12 @@ class TransactionRepository implements TransactionRepositoryInterface{
                     }
                 }
             }else if($request['type'] == 'orgc'){
-                // check if code exists and if count is more than 0
+                /*
+                    this is for organization card type
+                    validate code
+                    get trip information from trip table
+                    if trip exists, reduce user units based on charge for trip
+                 */
                 $checkCode = PayAsYouGoCodes::where('code', $request['trip_no'])->first();
                 if($checkCode){
                     $trip = Trip::where('payg_id', $checkCode->id)
@@ -384,6 +419,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                             ->first();
 
                     if($trip){
+                        // CHARGE CARD
                         $reduce = $checkCode->count - $this->charge_trip(
                             $trip['start_latitude'],
                             $trip['start_longitude'],
@@ -395,6 +431,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                         $checkCode->count = $reduce;
                         $checkCode->save();
 
+                        // UPDATE TRIP
                         $trip->finish_longitude = $request['longitude'];
                         $trip->finish_latitude	= $request['latitude'];
                         $trip->units = $this->charge_trip(
@@ -413,8 +450,13 @@ class TransactionRepository implements TransactionRepositoryInterface{
                 }else{
                     return res_not_found('code not found!');
                 }
-            }
-            else if($request['type'] == 'worc'){
+            }else if($request['type'] == 'worc'){
+                 /*
+                    this is for organization WAITING card type
+                    validate code
+                    get trip information from trip table
+                    if trip exists, reduce user units based on charge for trip
+                 */
                 $checkCode = PayAsYouGoCodes::where('code', $request['trip_no'])->first();
                 if($checkCode){
                     $trip = Trip::where('payg_id', $checkCode->id)
@@ -424,6 +466,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                             ->latest()->first();
 
                     if($trip){
+                        // CHARGE CARD
                         $reduce = $checkCode->count - $this->charge_trip(
                             $trip['start_latitude'],
                             $trip['start_longitude'],
@@ -434,7 +477,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                         );
                         $checkCode->count = $reduce;
                         $checkCode->save();
-
+                        // UPDATE TRIP
                         $trip->finish_longitude = $request['longitude'];
                         $trip->finish_latitude	= $request['latitude'];
                         $trip->units = $this->charge_trip(
@@ -454,7 +497,12 @@ class TransactionRepository implements TransactionRepositoryInterface{
                     return res_not_found('code not found!');
                 }
             }else{
-                // check if code exists and if count is more than 0
+                /*
+                    this is for PAYG card type
+                    validate code
+                    get trip information from trip table
+                    if trip exists, reduce user units based on charge for trip
+                 */
                 $checkCode = PayAsYouGoCodes::where('code', $request['trip_no'])->first();
                 if($checkCode){
                     $trip = Trip::where('payg_id', $checkCode->id)
@@ -464,6 +512,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                     ->first();
 
                     if($trip){
+                        // CHARGE CARD
                         $reduce = $checkCode->count - $this->charge_trip(
                             $trip['start_latitude'],
                             $trip['start_longitude'],
@@ -474,6 +523,7 @@ class TransactionRepository implements TransactionRepositoryInterface{
                         $checkCode->count = $reduce;
                         $checkCode->save();
 
+                        // UPDATE TRIP
                         $trip->finish_longitude = $request['longitude'];
                         $trip->finish_latitude	= $request['latitude'];
                         $trip->units = $this->charge_trip(
