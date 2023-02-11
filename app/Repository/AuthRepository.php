@@ -192,7 +192,7 @@ class AuthRepository implements AuthRepositoryInterface{
             $theMessage = "Hello! Your New Citfare Verification Code is " . $verifyOtp->otp . " .This code is valid for the next " . config('services.settings.otp_validity') . "minutes.";
             $otpSent = $this->sendSmsAction($theMessage, $verifyOtp->phone);
             $otpSent;
-            return res_success('otp resent', $verifyOtp->otp);
+            return res_completed('otp resent');
             // return res_new_otp_sent('A new otp has been sent to the phone number!');
         } else {
             return res_not_found("You don't have any process in progress");
