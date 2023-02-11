@@ -95,12 +95,11 @@ class User extends Authenticatable
         return $this->hasMany(TripPackageLog::class, 'user_id');
     }
     public function trip_units(){
-        return $this->hasMany(UserTrip::class, 'bus_id');
+        return $this->hasMany(UserTrip::class, 'user_id');
     }
     public function cards(){
         return $this->hasMany(PayAsYouGoCodes::class, 'user_id');
     }
-
     public function institution(){
         return $this->belongsTo(User::class, 'institution_id');
     }

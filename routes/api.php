@@ -7,7 +7,9 @@ use App\Http\Controllers\FlutterWaveController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\UserController;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,11 +23,13 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+
 
 Route::prefix('v1')->group(function(){
+    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+        $id = $request->user()->id;
+        return User::with('package')->with('trip_units')->with('cards')->with('institution')->where('id', $id)->get();
+    });
     Route::post('paystack/webhook', [TransactionController::class, 'webHookHandlerPaystack']);
     Route::post('/pay',[TransactionController::class, 'pay'] );
         // Authentication Routes
