@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function(){
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         $id = $request->user()->id;
-        return User::with('package')->with('trip_units')->with('cards')->with('institution')->where('id', $id)->get();
+        return User::with('trip_units')->with('cards')->with('institution')->where('id', $id)->get();
     });
     Route::post('paystack/webhook', [TransactionController::class, 'webHookHandlerPaystack']);
     Route::post('/pay',[TransactionController::class, 'pay'] );
